@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, ArrowUpRight, ArrowDownRight, DollarSign, Wallet, CreditCard, PiggyBank } from "lucide-react"
+import { Plus, ArrowUpRight, ArrowDownRight, DollarSign, Wallet, CreditCard, PiggyBank, Trash2 } from "lucide-react"
 import { NetWorthChart, MetricType } from "@/components/dashboard/NetWorthChart"
 import { AddTransactionSheet } from "@/components/finances/AddTransactionSheet"
 import { Transaction } from "@/types/finance"
