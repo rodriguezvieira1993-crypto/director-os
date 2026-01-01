@@ -167,7 +167,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         })
 
         return () => subscription.unsubscribe()
-    }, [pathname, router])
+    }, [router])
 
     const fetchData = async (userId: string) => {
         setIsLoading(true)
