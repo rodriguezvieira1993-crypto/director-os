@@ -11,7 +11,7 @@ import { useData } from "@/context/DataProvider"
 import { cn } from "@/lib/utils"
 
 export default function FinancesPage() {
-    const { transactions, addTransaction, objectives } = useData()
+    const { transactions, addTransaction, objectives, deleteTransaction } = useData()
     const [isSheetOpen, setIsSheetOpen] = useState(false)
     const [selectedMetric, setSelectedMetric] = useState<MetricType>("income")
 
@@ -189,13 +189,24 @@ export default function FinancesPage() {
                                                 <p className="text-xs text-muted-foreground">{t.category} • {t.date.toLocaleDateString()}</p>
                                             </div>
                                         </div>
-                                        <div className={cn(
-                                            "font-medium",
-                                            t.type === 'income' ? "text-green-500" :
-                                                t.type === 'expense' ? "text-foreground" :
-                                                    "text-blue-500"
-                                        )}>
-                                            {t.type === 'income' ? "+" : t.type === 'expense' ? "-" : ""}${t.amount.toLocaleString()}
+                                        <div className="flex items-center gap-2">
+                                            <div className={cn(
+                                                "font-medium",
+                                                t.type === 'income' ? "text-green-500" :
+                                                    t.type === 'expense' ? "text-foreground" :
+                                                        "text-blue-500"
+                                            )}>
+                                                {t.type === 'income' ? "+" : t.type === 'expense' ? "-" : ""}${t.amount.toLocaleString()}
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                onClick={() => deleteTransaction(t.id)}
+                                                title="Eliminar"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     </div>
                                 ))
