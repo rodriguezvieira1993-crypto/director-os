@@ -209,8 +209,41 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             setObjectives(mappedObjectives)
         } else {
             // Seed initial data if empty
-            // Optional: Auto-insert? For now just setting state is safer to avoid loops
-            setObjectives(INITIAL_OBJECTIVES)
+            toast.info("Inicializando base de datos...")
+
+            const seedData = INITIAL_OBJECTIVES.map(obj => ({
+                user_id: userId,
+                title: obj.title,
+                category: obj.category,
+                icon: obj.icon,
+                status: obj.status,
+                progress: obj.progress,
+                key_results: obj.keyResults
+            }))
+
+            const { data: insertedData, error: insertError } = await supabase
+                .from('objectives')
+                .insert(seedData)
+                .select()
+
+            if (insertedData) {
+                const mappedObjectives: Objective[] = insertedData.map((o: any) => ({
+                    id: o.id, // Now real UUID
+                    title: o.title,
+                    category: o.category,
+                    icon: o.icon,
+                    status: o.status,
+                    progress: o.progress,
+                    keyResults: o.key_results || []
+                }))
+                setObjectives(mappedObjectives)
+                toast.success("Datos iniciales creados")
+            } else {
+                console.error("Error seeding:", insertError)
+                toast.error("Error inicializando datos")
+                // Fallback to local
+                setObjectives(INITIAL_OBJECTIVES)
+            }
         }
 
         setIsLoading(false)
