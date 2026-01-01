@@ -121,8 +121,8 @@ const INITIAL_OBJECTIVES: Objective[] = [
 ]
 
 import { useRouter, usePathname } from 'next/navigation'
-
-// ... (keep usage of supabase)
+import { supabase } from '@/lib/supabase'
+import { Session } from '@supabase/supabase-js'
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
     const [transactions, setTransactions] = useState<Transaction[]>([])
