@@ -7,9 +7,10 @@ interface SavingsThermometerProps {
     max?: number // Max scale value (default 100)
     goal?: number // Target value (e.g., 20%)
     label?: string
+    totalGoalAmount?: number
 }
 
-export function SavingsThermometer({ value, max = 100, goal = 20, label = "Tasa de Ahorro" }: SavingsThermometerProps) {
+export function SavingsThermometer({ value, max = 100, goal = 20, label = "Tasa de Ahorro", totalGoalAmount }: SavingsThermometerProps) {
     // Clamp value to max to prevent overflow
     const clampedValue = Math.min(Math.max(value, 0), max)
     const percentage = (clampedValue / max) * 100
@@ -52,7 +53,14 @@ export function SavingsThermometer({ value, max = 100, goal = 20, label = "Tasa 
 
             <div className="mt-12 text-center">
                 <h4 className="text-muted-foreground text-sm uppercase tracking-widest">{label}</h4>
-                <p className="text-xs text-white/50 mt-1">Este {value >= goal ? "mes vas genial 🚀" : "mes toca apretarse el cinturón 📉"}</p>
+                <div className="flex flex-col gap-1 mt-1">
+                    <p className="text-xs text-white/50">Este {value >= goal ? "mes vas genial 🚀" : "mes toca apretarse el cinturón 📉"}</p>
+                    {totalGoalAmount !== undefined && (
+                        <p className="text-sm font-medium text-blue-400 mt-1">
+                            Meta Acumulada: ${totalGoalAmount.toLocaleString()}
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
     )

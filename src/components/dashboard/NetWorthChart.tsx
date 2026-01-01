@@ -28,9 +28,10 @@ interface NetWorthChartProps {
     metric: MetricType
     timeRange: TimeRangeType
     data?: { month: string, value: number }[]
+    savingsGoal?: number
 }
 
-export function NetWorthChart({ metric, timeRange, data }: NetWorthChartProps) {
+export function NetWorthChart({ metric, timeRange, data, savingsGoal }: NetWorthChartProps) {
     const chartData = data || generateData(metric)
 
 
@@ -50,7 +51,7 @@ export function NetWorthChart({ metric, timeRange, data }: NetWorthChartProps) {
         // For Savings, we show the Thermometer visualization of the *current* status (last month)
         // or an average. For now, let's show the last data point as the "current" status.
         const lastValue = chartData[chartData.length - 1].value;
-        return <SavingsThermometer value={lastValue} />
+        return <SavingsThermometer value={lastValue} totalGoalAmount={savingsGoal} />
     }
 
     return (

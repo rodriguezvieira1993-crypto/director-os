@@ -11,9 +11,28 @@ import { useData } from "@/context/DataProvider"
 import { cn } from "@/lib/utils"
 
 export default function FinancesPage() {
-    const { transactions, addTransaction } = useData()
+    const { transactions, addTransaction, objectives } = useData()
     const [isSheetOpen, setIsSheetOpen] = useState(false)
     const [selectedMetric, setSelectedMetric] = useState<MetricType>("income")
+
+    // Calculate Total Savings Goal (Excluding Business/Revenue)
+    const totalSavingsNeeded = objectives.reduce((total, obj) => {
+        const objTotal = obj.keyResults?.reduce((krTotal, kr) => {
+            const titleLower = kr.title.toLowerCase()
+            // Exclude "Facturación", "Ingreso", "Agencia" revenue
+            const isRevenue = titleLower.includes("factur") ||
+                titleLower.includes("ingreso") ||
+                titleLower.includes("sueldo")
+
+            if (isRevenue) return krTotal;
+
+            if (kr.type === 'currency' && kr.targetValue) {
+                return krTotal + kr.targetValue
+            }
+            return krTotal
+        }, 0) || 0
+        return total + objTotal
+    }, 0)
 
     // Calculate Totals
     const totalIncome = transactions
@@ -137,7 +156,7 @@ export default function FinancesPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="pl-2">
-                        <NetWorthChart metric={selectedMetric} timeRange="1Y" data={chartData} />
+                        <NetWorthChart metric={selectedMetric} timeRange="1Y" data={chartData} savingsGoal={totalSavingsNeeded} />
                     </CardContent>
                 </Card>
 
