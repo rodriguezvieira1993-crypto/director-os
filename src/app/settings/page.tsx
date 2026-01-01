@@ -7,7 +7,7 @@ import { AlertTriangle, Copy, Database, RefreshCw, Trash2 } from "lucide-react"
 import { useState } from "react"
 
 export default function SettingsPage() {
-    const { transactions, objectives, resetData } = useData()
+    const { transactions, objectives, resetData, repairDatabase } = useData()
     const [copied, setCopied] = useState(false)
 
     const handleCopyData = () => {
@@ -54,6 +54,17 @@ export default function SettingsPage() {
                             <Button variant="outline" onClick={handleCopyData}>
                                 <Copy className="mr-2 h-4 w-4" />
                                 {copied ? "Copiado!" : "Copiar Datos"}
+                            </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border rounded-lg border-yellow-500/20 bg-yellow-500/10">
+                            <div>
+                                <h3 className="font-medium text-yellow-500">Reparar Base de Datos</h3>
+                                <p className="text-sm text-muted-foreground">Si tus objetivos no se guardan, usa esto para reinicializar la conexión.</p>
+                            </div>
+                            <Button variant="secondary" onClick={() => repairDatabase()}>
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                                Reparar Conexión
                             </Button>
                         </div>
 

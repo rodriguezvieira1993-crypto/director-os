@@ -14,6 +14,7 @@ interface DataContextType {
     updateObjective: (objective: Objective) => void
     deleteObjective: (id: string) => void
     resetData: () => void
+    repairDatabase: () => Promise<void>
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
@@ -389,6 +390,54 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         setObjectives(INITIAL_OBJECTIVES)
     }
 
+    const repairDatabase = async () => {
+        if (!session) {
+            toast.error("No hay sesión activa")
+            return
+        }
+
+        toast.info("Reparando base de datos...")
+
+        // 1. Delete all existing objectives to avoid duplicates (Resets to clean slate)
+        await supabase.from('objectives').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+        // 2. Insert Initial Data
+        const seedData = INITIAL_OBJECTIVES.map(obj => ({
+            user_id: session.user.id,
+            title: obj.title,
+            category: obj.category,
+            icon: obj.icon,
+            status: obj.status,
+            progress: obj.progress,
+            key_results: obj.keyResults
+        }))
+
+        const { data: insertedData, error } = await supabase
+            .from('objectives')
+            .insert(seedData)
+            .select()
+
+        if (error) {
+            console.error(error)
+            toast.error("Error al reparar DB: " + error.message)
+            return
+        }
+
+        if (insertedData) {
+            const mappedObjectives: Objective[] = insertedData.map((o: any) => ({
+                id: o.id,
+                title: o.title,
+                category: o.category,
+                icon: o.icon,
+                status: o.status,
+                progress: o.progress,
+                keyResults: o.key_results || []
+            }))
+            setObjectives(mappedObjectives)
+            toast.success("Base de datos reparada correctamente")
+        }
+    }
+
     return (
         <DataContext.Provider value={{
             transactions,
@@ -398,7 +447,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             addObjective,
             updateObjective,
             deleteObjective,
-            resetData
+            resetData,
+            repairDatabase
         }}>
             {children}
         </DataContext.Provider>
