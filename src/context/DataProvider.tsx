@@ -120,39 +120,53 @@ const INITIAL_OBJECTIVES: Objective[] = [
     }
 ]
 
-import { supabase } from '@/lib/supabase'
-import { Session } from '@supabase/supabase-js'
+import { useRouter, usePathname } from 'next/navigation'
 
-// ... (keep interface and INITIAL_OBJECTIVES)
+// ... (keep usage of supabase)
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
     const [transactions, setTransactions] = useState<Transaction[]>([])
     const [objectives, setObjectives] = useState<Objective[]>([])
     const [session, setSession] = useState<Session | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const router = useRouter()
+    const pathname = usePathname()
 
     // 1. Auth Listener
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
             setSession(session)
-            if (session) fetchData(session.user.id)
-            else setIsLoading(false)
-        })
+            if (session) {
+                fetchData(session.user.id)
+            } else {
+                setIsLoading(false)
+                if (pathname !== '/login') {
+                    router.push('/login')
+                }
+            }
+        }
+
+        checkAuth()
 
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session)
-            if (session) fetchData(session.user.id)
-            else {
+            if (session) {
+                fetchData(session.user.id)
+            } else {
                 setTransactions([])
                 setObjectives([])
                 setIsLoading(false)
+                if (pathname !== '/login') {
+                    router.push('/login')
+                }
             }
         })
 
         return () => subscription.unsubscribe()
-    }, [])
+    }, [pathname, router])
 
     const fetchData = async (userId: string) => {
         setIsLoading(true)
