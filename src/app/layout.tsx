@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/layout/Header"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { DataProvider } from "@/context/DataProvider"
+import { Toaster } from "sonner"
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,6 +53,7 @@ export default function RootLayout({
                 </main>
               </div>
             </div>
+            <Toaster richColors />
           </DataProvider>
         </ThemeProvider>
       </body>

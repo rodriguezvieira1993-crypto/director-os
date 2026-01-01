@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Transaction } from '@/types/finance'
 import { Objective } from '@/types/objective'
+import { toast } from 'sonner'
 
 interface DataContextType {
     transactions: Transaction[]
@@ -272,6 +273,35 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const updateObjective = async (updatedObjective: Objective) => {
         if (!session) return
 
+        // 1. Handle Initial/Mock Data (IDs like "1", "2") -> INSERT instead of UPDATE
+        if (updatedObjective.id.length < 10) {
+            const dbObjective = {
+                user_id: session.user.id,
+                title: updatedObjective.title,
+                category: updatedObjective.category,
+                icon: updatedObjective.icon,
+                status: updatedObjective.status,
+                progress: updatedObjective.progress,
+                key_results: updatedObjective.keyResults
+            }
+
+            const { data, error } = await supabase.from('objectives').insert(dbObjective).select().single()
+
+            if (error) {
+                console.error("Error creating initial objective:", error)
+                toast.error("Error al guardar por primera vez")
+                return
+            }
+
+            // Replace the mock object with the real DB object in state
+            setObjectives(prev => prev.map(obj =>
+                obj.id === updatedObjective.id ? { ...updatedObjective, id: data.id } : obj
+            ))
+            toast.success("Objetivo inicial guardado en nube")
+            return
+        }
+
+        // 2. Normal Update (Existing UUID)
         const dbObjective = {
             title: updatedObjective.title,
             category: updatedObjective.category,
@@ -285,18 +315,34 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
         if (error) {
             console.error("Error updating objective:", error)
+            toast.error("Error al guardar cambios")
             return
         }
 
         setObjectives(prev => prev.map(obj =>
             obj.id === updatedObjective.id ? updatedObjective : obj
         ))
+        toast.success("Cambios guardados")
     }
 
     const deleteObjective = async (id: string) => {
         if (!session) return
-        await supabase.from('objectives').delete().eq('id', id)
+
+        // If it's a mock ID, just remove from state
+        if (id.length < 10) {
+            setObjectives(prev => prev.filter(obj => obj.id !== id))
+            return
+        }
+
+        const { error } = await supabase.from('objectives').delete().eq('id', id)
+
+        if (error) {
+            toast.error("Error al eliminar")
+            return
+        }
+
         setObjectives(prev => prev.filter(obj => obj.id !== id))
+        toast.success("Objetivo eliminado")
     }
 
     const resetData = async () => {
