@@ -281,7 +281,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             key_results: updatedObjective.keyResults
         }
 
-        await supabase.from('objectives').update(dbObjective).eq('id', updatedObjective.id)
+        const { error } = await supabase.from('objectives').update(dbObjective).eq('id', updatedObjective.id)
+
+        if (error) {
+            console.error("Error updating objective:", error)
+            return
+        }
 
         setObjectives(prev => prev.map(obj =>
             obj.id === updatedObjective.id ? updatedObjective : obj
